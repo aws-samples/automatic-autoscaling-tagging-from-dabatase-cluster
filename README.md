@@ -7,8 +7,10 @@ Customers would like to extend cluster tags to all autoscaling read replicas cre
 When the autoscaling read replica is created, a CreateDBInstance event is generated and it can be captured by EventBridge with the corresponding rule.
 The rule will trigger a lambda function that makes some checks to verify if it is an autoscaling event. Then, it extracts the cluster name from the autoscaling instance event Tags, to retrieve the corresponding cluster identifier to read the tags which are applied to the autoscaling instance.
 
-| :-------------:|
-|![](automatic-autoscaling-tagging-from-dabatase-cluster.png)|
+<p align="center">
+  <img src="automatic-autoscaling-tagging-from-dabatase-cluster.png">
+</p>
+
 ## Instructions
 
 ### Step 1. Create a new policy
