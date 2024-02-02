@@ -8,7 +8,7 @@ When the autoscaling read replica is created, a CreateDBInstance event is genera
 The rule will trigger a lambda function that makes some checks to verify if it is an autoscaling event. Then, it extracts the cluster name from the autoscaling instance event Tags, to retrieve the corresponding cluster identifier to read the tags which are applied to the autoscaling instance.
 
 <p align="center">
-  <img src="automatic-autoscaling-tagging-from-dabatase-cluster.png">
+  <img src="img/automatic-autoscaling-tagging-from-dabatase-cluster.png">
 </p>
 
 ## Instructions
