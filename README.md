@@ -14,24 +14,33 @@ The rule will trigger a lambda function that makes some checks to verify if it i
 ## Instructions
 
 ### Step 1. Create a new policy
-Create a new IAM policy **autoscaling-tagging-policy** to allow the following actions related to RDS
+Create a new IAM policy **autoscaling-tagging-policy** to allow the following actions related to RDS.
+Replace **AWSREGION** and **AWSACCOUNT** in the policy below, with the corresponding region and account ID it will run on
+
 ```
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "autoscaling-tagging-policy",
-            "Effect": "Allow",
-            "Action": [
-                "rds:AddTagsToResource",
-                "rds:DescribeDBInstances",
-                "rds:DescribeDBClusters",
-                "rds:ListTagsForResource"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
+ {
+     "Version": "2012-10-17",
+     "Statement": [
+         {
+             "Sid": "Autoscaling",
+             "Effect": "Allow",
+             "Action": [
+                 "rds:AddTagsToResource",
+                 "rds:DescribeDBInstances",
+                 "rds:ListTagsForResource"
+             ],
+             "Resource": "arn:aws:rds:AWSREGION:AWSACCOUNT:db:application-autoscaling-*"
+         },
+         {
+             "Sid": "Cluster",
+             "Effect": "Allow",
+             "Action": [
+                 "rds:DescribeDBClusters",
+                 "rds:ListTagsForResource"
+             ],
+             "Resource": "arn:aws:rds:**AWSREGION**:**AWSACCOUNT**:cluster:*"
+         }
+     ]
 ```
 
 ### Step 2. Create a Lambda function
