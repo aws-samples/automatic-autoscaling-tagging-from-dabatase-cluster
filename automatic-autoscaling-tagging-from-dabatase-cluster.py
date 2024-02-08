@@ -4,7 +4,7 @@ import boto3
 def lambda_handler(event, context):    
     if 'Tags' in event['detail'] and 'application-autoscaling:resourceId' in event['detail']['Tags']:
         try:
-            resource_identifier = event['detail']['SourceIdentifier']
+            resource_identifier = event['detail']['SourceArn']
             cluster_id = event['detail']['Tags']['application-autoscaling:resourceId']
             account = event['account']
             region = event['region']
