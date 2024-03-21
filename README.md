@@ -41,6 +41,7 @@ Replace **AWSREGION** and **AWSACCOUNT** in the policy below, with the correspon
              "Resource": "arn:aws:rds:**AWSREGION**:**AWSACCOUNT**:cluster:*"
          }
      ]
+}
 ```
 
 ### Step 2. Create a Lambda function
