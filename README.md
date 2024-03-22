@@ -11,7 +11,11 @@ The rule will trigger a lambda function that makes some checks to verify if it i
   <img src="img/automatic-autoscaling-tagging-from-dabatase-cluster.png">
 </p>
 
-## Instructions
+### CloudFormation templates
+Feel free to download the corresponding CloudFormation template in YAML or JSON.
+Then, create the stack with "Upload Template File" and upload the YAML or JSON file just downloaded.
+
+## Manual Instructions
 
 ### Step 1. Create a new policy
 Create a new IAM policy **autoscaling-tagging-policy** to allow the following actions related to RDS.
