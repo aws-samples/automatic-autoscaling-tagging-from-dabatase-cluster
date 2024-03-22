@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template for RDS tagging Lambda function
+Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: aurora-autoscaling-tagging-from-cluster-role-eb87bc8dfafdasa
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: aurora-autoscaling-tagging-from-cluster-policy-eb87bc8dfafdas8
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 'logs:CreateLogGroup'
+                Resource: !Join 
+                  - ':'
+                  - - arn
+                    - aws
+                    - logs
+                    - !Ref 'AWS::Region'
+                    - !Ref 'AWS::AccountId'
+                    - '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: !Join 
+                  - ':'
+                  - - arn
+                    - aws
+                    - logs
+                    - !Ref 'AWS::Region'
+                    - !Ref 'AWS::AccountId'
+                    - log-group
+                    - >-
+                      /aws/lambda/automatic-autoscaling-tagging-from-dabatase-cluster:*
+              - Effect: Allow
+                Action:
+                  - 'rds:AddTagsToResource'
+                  - 'rds:DescribeDBInstances'
+                  - 'rds:ListTagsForResource'
+                Resource: !Join 
+                  - ':'
+                  - - arn
+                    - aws
+                    - rds
+                    - !Ref 'AWS::Region'
+                    - !Ref 'AWS::AccountId'
+                    - 'db:application-autoscaling-*'
+              - Sid: Cluster
+                Effect: Allow
+                Action:
+                  - 'rds:DescribeDBClusters'
+                  - 'rds:ListTagsForResource'
+                Resource: !Join 
+                  - ':'
+                  - - arn
+                    - aws
+                    - rds
+                    - !Ref 'AWS::Region'
+                    - !Ref 'AWS::AccountId'
+                    - 'cluster:*'
+  LambdaPermission:
+    UpdateReplacePolicy: Delete
+    Type: 'AWS::Lambda::Permission'
+    DeletionPolicy: Delete
+    Properties:
+      FunctionName: !GetAtt 
+        - LambdaFunction
+        - Arn
+      Action: 'lambda:InvokeFunction'
+      SourceArn: !GetAtt 
+        - EventRule
+        - Arn
+      Principal: events.amazonaws.com
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      MemorySize: 128
+      FunctionName: aurora-autoscaling-tagging-from-cluster
+      Description: Lambda tagging from Cluster
+      Handler: index.lambda_handler
+      Role: !GetAtt 
+        - LambdaExecutionRole
+        - Arn
+      Code:
+        ZipFile: "import json\nimport boto3\ndef lambda_handler(event, context):\n\tif 'Tags' in event['detail'] and 'application-autoscaling:resourceId' in event['detail']['Tags']:\n\t\ttry:\n\t\t\tresource_identifier = event['detail']['SourceArn']\n\t\t\tcluster_id = event['detail']['Tags']['application-autoscaling:resourceId']\n\t\t\taccount = event['account']\n\t\t\tregion = event['region']\n\t\t\trds = boto3.client('rds', region_name=region)\n\t\t\tcluster_arn='arn:aws:rds:'+region+':'+account+':'+cluster_id\n\t\t\tcluster_tags = rds.list_tags_for_resource(ResourceName=cluster_arn,)['TagList']\n\t\t\tresponse = rds.describe_db_instances(DBInstanceIdentifier=resource_identifier)\n\t\t\tautoscaling_tags=response['DBInstances'][0]['TagList']\n\t\t\tfor cluster_tag in cluster_tags:\n\t\t\t\tif cluster_tag not in autoscaling_tags:\n\t\t\t\t\tresponse = rds.add_tags_to_resource(ResourceName=event['detail']['SourceArn'], Tags=[cluster_tag])\n\t\texcept Exception as e:\n\t\t\tprint (e)"
+      Runtime: python3.12
+      Timeout: 3
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+      FileSystemConfigs: []
+      LoggingConfig:
+        LogFormat: Text
+        LogGroup: /aws/lambda/automatic-autoscaling-tagging-from-dabatase-cluster
+      EphemeralStorage:
+        Size: 512
+      Architectures:
+        - x86_64
+  EventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      EventBusName: default
+      EventPattern:
+        source:
+          - aws.rds
+        detail-type:
+          - RDS DB Instance Event
+        detail:
+          EventCategories:
+            - creation
+          SourceType:
+            - DB_INSTANCE
+          Message:
+            - DB instance created
+          EventID:
+            - RDS-EVENT-0005
+      Name: aurora-autoscaling-event-rule
+      State: ENABLED
+      Targets:
+        - Id: Id9bf3c758-9c88-4eb2-b31b-c78af9155f68
+          Arn: !Join 
+            - ':'
+            - - arn
+              - !Ref 'AWS::Partition'
+              - lambda
+              - !Ref 'AWS::Region'
+              - !Ref 'AWS::AccountId'
+              - function
+              - aurora-autoscaling-tagging-from-cluster
+        - Id: egfwgrewghreghreherhewr
+          Arn: !Join 
+            - ':'
+            - - arn
+              - !Ref 'AWS::Partition'
+              - sns
+              - !Ref 'AWS::Region'
+              - !Ref 'AWS::AccountId'
+              - sns-tagging
