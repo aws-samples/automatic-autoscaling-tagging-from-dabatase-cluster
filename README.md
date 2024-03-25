@@ -11,13 +11,16 @@ The rule will trigger a lambda function that makes some checks to verify if it i
   <img src="img/automatic-autoscaling-tagging-from-dabatase-cluster.png">
 </p>
 
-### CloudFormation templates
-Feel free to download the corresponding CloudFormation template in YAML or JSON.
-Then, create the stack with "Upload Template File" and upload the YAML or JSON file just downloaded.
+## Instructions
 
-## Manual Instructions
+### Deploy via CloudFormation template
+This sample can be setup via CloudFormation templates available in YAML or JSON.
+Create the stack with "Upload Template File" to upload the corresponding YAML or JSON.
+Review the resulting services configured.
 
-### Step 1. Create a new policy
+### Manual deploy
+
+#### Step 1. Create a new policy
 Create a new IAM policy **autoscaling-tagging-policy** to allow the following actions related to RDS.
 Replace **AWSREGION** and **AWSACCOUNT** in the policy below, with the corresponding region and account ID it will run on
 
@@ -48,7 +51,7 @@ Replace **AWSREGION** and **AWSACCOUNT** in the policy below, with the correspon
 }
 ```
 
-### Step 2. Create a Lambda function
+#### Step 2. Create a Lambda function
 Create a Lambda with
 - **Function name:** *aurora-autoscaling-tagging-from-cluster*
 - **Runtime:** *Python 3.12*
@@ -56,9 +59,9 @@ Create a Lambda with
 while leaving the other parameters as default.
 Once the function has been created, copy the code available in **automatic-autoscaling-tagging-from-dabatase-cluster.py** and paste it in the lambda *Code* tab, then press *Deploy* to commit the changes.
 
-Then, move into the Lambda *configuration* tab, on the left select the *Permissions* and click on the *Role name* which looks like *automatic-autoscaling-tagging-from-dabatase-cluste-role-a1b2c3d4*, click on *Attach Policy*, type in the search bar *autoscaling-tagging-policy*, tick the policy called *autoscaling-tagging-policy* and press "Add permissions".
+Then, move into the Lambda *configuration* tab, on the left select the *Permissions* and click on the *Role name* which looks like *automatic-autoscaling-tagging-from-dabatase-cluste-role-a1b2c3d4*, click on *Attach Policy*, type in the search bar *autoscaling-tagging-policy*, tick the policy called *autoscaling-tagging-policy* and press "Add permissions". The lambda should have the default permissions for writing logs into CloudWatch.
 
-### Step 3. Create an EventBridge rule 
+#### Step 3. Create an EventBridge rule 
 Go to EventBridge, select *Rule* on the left menu and press **Create Rule**.
 Define the Rule detail as follow:
 - **Name:** Create-DB-Instance-Rule
